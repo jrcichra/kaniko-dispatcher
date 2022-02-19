@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -67,14 +68,50 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 						{
 							Name:  jobRequest.Name,
 							Image: "gcr.io/kaniko-project/executor:latest",
+							Args: []string{
+								"--context", jobRequest.Context,
+								"--destination", jobRequest.Destination,
+							},
+							VolumeMounts: []v1.VolumeMount{
+								{
+									Name:      "kaniko-secret",
+									MountPath: "/kaniko/.docker",
+									ReadOnly:  true,
+								},
+							},
+							Resources: v1.ResourceRequirements{
+								Limits: v1.ResourceList{
+									v1.ResourceCPU:    resource.MustParse("100m"),
+									v1.ResourceMemory: resource.MustParse("512Mi"),
+								},
+								Requests: v1.ResourceList{
+									v1.ResourceCPU:    resource.MustParse("800m"),
+									v1.ResourceMemory: resource.MustParse("2048Mi"),
+								},
+							},
 						},
 					},
 					RestartPolicy: v1.RestartPolicyNever,
+					Volumes: []v1.Volume{
+						{
+							Name: "kaniko-secret",
+							VolumeSource: v1.VolumeSource{
+								Secret: &v1.SecretVolumeSource{
+									SecretName: jobRequest.Secret,
+									Items: []v1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: "config.json",
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 	}
-
 	resp, err := jobs.Create(context.TODO(), jobSpec, metav1.CreateOptions{})
 	return resp, err
 }
