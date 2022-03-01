@@ -28,6 +28,7 @@ type JobRequest struct {
 	Context     string `json:"context"`
 	Destination string `json:"destination"`
 	Secret      string `json:"secret"`
+	Arch        string `json:"arch,omitempty"`
 }
 
 type JobQuery struct {
@@ -56,6 +57,12 @@ func connectToK8s() *kubernetes.Clientset {
 func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string) (*batchv1.Job, error) {
 	jobs := k.k8sClient.BatchV1().Jobs(namespace)
 
+	// determine if nodeSelector needs to pick a specific architecture
+	var nodeSelector map[string]string
+	if jobRequest.Arch != "" {
+		nodeSelector = map[string]string{"kubernetes.io/arch": jobRequest.Arch}
+	}
+
 	jobSpec := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      jobRequest.Name,
@@ -64,6 +71,7 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 		Spec: batchv1.JobSpec{
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
+					NodeSelector: nodeSelector,
 					Containers: []v1.Container{
 						{
 							Name:  jobRequest.Name,
