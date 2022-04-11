@@ -73,7 +73,10 @@ func (k *KanikoDispatcher) cleanup() {
 			// delete all jobs older than a day
 			if job.CreationTimestamp.Add(24 * time.Hour).Before(time.Now()) {
 				log.Println("Deleting job", job.Name)
-				err := jobs.Delete(context.TODO(), job.Name, metav1.DeleteOptions{})
+				bg := metav1.DeletePropagationBackground
+				err := jobs.Delete(context.TODO(), job.Name, metav1.DeleteOptions{
+					PropagationPolicy: &bg,
+				})
 				if err != nil {
 					log.Println("Failed to delete job", job.Name, err)
 				}
