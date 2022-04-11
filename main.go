@@ -7,6 +7,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	batchv1 "k8s.io/api/batch/v1"
@@ -54,7 +55,35 @@ func connectToK8s() *kubernetes.Clientset {
 
 }
 
+func (k *KanikoDispatcher) cleanup() {
+	t := time.NewTicker(time.Minute * 5)
+	for {
+		// wait for the ticker
+		<-t.C
+
+		log.Println("Cleaning up old jobs...")
+
+		jobs := k.k8sClient.BatchV1().Jobs(k.namespace)
+		list, err := jobs.List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			log.Println("Failed to list jobs", err)
+			return
+		}
+		for _, job := range list.Items {
+			// delete all jobs older than a day
+			if job.CreationTimestamp.Add(24 * time.Hour).Before(time.Now()) {
+				log.Println("Deleting job", job.Name)
+				err := jobs.Delete(context.TODO(), job.Name, metav1.DeleteOptions{})
+				if err != nil {
+					log.Println("Failed to delete job", job.Name, err)
+				}
+			}
+		}
+	}
+}
+
 func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string) (*batchv1.Job, error) {
+
 	jobs := k.k8sClient.BatchV1().Jobs(namespace)
 
 	// determine if nodeSelector needs to pick a specific architecture
@@ -200,5 +229,6 @@ func main() {
 	}
 
 	go engine.web()
+	go engine.cleanup()
 	select {}
 }
