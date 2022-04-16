@@ -30,6 +30,7 @@ if ARCH:
 
 headers = json.loads(HEADERS) if HEADERS else {}
 
+print(f"Request: {request}. Headers: {headers}")
 r = requests.post(f"{URL}/kaniko", json=request, headers=headers)
 if r.status_code != 200:
     print(r.text)
