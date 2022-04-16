@@ -1,9 +1,13 @@
-name: docker
+name: Docker
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-amd64:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,9 +41,8 @@ jobs:
             MINOR=${VERSION%.*}
             MAJOR=${MINOR%.*}
             TAGS="$TAGS,${DOCKER_IMAGE}:${MINOR},${DOCKER_IMAGE}:${MAJOR},${DOCKER_IMAGE}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
           fi
+          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::7}-amd64"
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -64,9 +67,11 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          platforms: linux/amd64
+          push: true
           tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
           labels: |
             org.opencontainers.image.title=${{ fromJson(steps.repo.outputs.result).name }}
             org.opencontainers.image.description=${{ fromJson(steps.repo.outputs.result).description }}
@@ -76,3 +81,63 @@ jobs:
             org.opencontainers.image.created=${{ steps.prep.outputs.created }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.licenses=${{ fromJson(steps.repo.outputs.result).license.spdx_id }}
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+  build-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Repo metadata
+        id: repo
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const repo = await github.repos.get(context.repo)
+            return repo.data
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Dispatch build to kaniko.jrcichra.dev
+        id: dispatch
+        uses: jrcichra/kaniko-dispatcher@main
+        with:
+          name: kaniko-dispatcher
+          url: https://kaniko.jrcichra.dev
+          context: "git://github.com/jrcichra/kaniko-dispatcher#${{ github.sha }}"
+          destination: "ghcr.io/jrcichra/kaniko-dispatcher:sha-${{ steps.vars.outputs.sha_short }}-arm64"
+          secret: justin-ghcr-io
+          arch: arm64
+          headers: |
+            {
+              "CF-Access-Client-Id" : "93a12e585dcfcf01442b6c75444a228b.access",
+              "CF-Access-Client-Secret" : "${{ secrets.ORACLE_K8S_ACCESS_TOKEN }}"
+            }
+
+  combine-manifests:
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Repo metadata
+        id: repo
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const repo = await github.repos.get(context.repo)
+            return repo.data
+      - name: Login to ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Combine manifests
+        run: .github/build/manifest.sh
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+          SHA: ${{ github.sha }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
