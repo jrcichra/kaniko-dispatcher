@@ -47,3 +47,4 @@ while True:
         sys.exit(0)
     elif response["done"] and not response["pass"]:
         sys.exit(1)
+    time.sleep(5)
