@@ -16,6 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/pointer"
 )
 
 type KanikoDispatcher struct {
@@ -101,6 +102,7 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 			Namespace: namespace,
 		},
 		Spec: batchv1.JobSpec{
+			BackoffLimit: pointer.Int32(2),
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
 					NodeSelector: nodeSelector,
