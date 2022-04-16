@@ -14,7 +14,7 @@ HEADERS = os.environ.get('INPUT_HEADERS')
 EPOCH = time.time_ns()
 
 
-FULLNAME = f"{NAME}-${EPOCH}"
+FULLNAME = f"{NAME}-{EPOCH}"
 
 request = {
     "name": FULLNAME,
