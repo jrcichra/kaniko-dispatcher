@@ -1,0 +1,36 @@
+# action.yml
+name: "Kaniko Dispatcher"
+description: "Send build jobs to Kaniko"
+inputs:
+  name:
+    description: "Name of Job"
+    required: true
+  url:
+    description: "URL of dispatcher"
+    required: true
+  context:
+    description: "Context for the build"
+    required: true
+  destination:
+    description: "Destination for container"
+    required: true
+  secret:
+    description: "Secret for pushing"
+    required: false
+  arch:
+    description: "Target architecture"
+    required: false
+  headers:
+    description: "Additional HTTP headers (for things like Cloudflare Access)"
+    required: false
+runs:
+  using: "docker"
+  image: "Dockerfile.action"
+  args:
+    - ${{ inputs.name }}
+    - ${{ inputs.url }}
+    - ${{ inputs.context }}
+    - ${{ inputs.destination }}
+    - ${{ inputs.secret }}
+    - ${{ inputs.arch }}
+    - ${{ inputs.headers }}

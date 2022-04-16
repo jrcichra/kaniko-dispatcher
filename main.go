@@ -184,12 +184,12 @@ func (k *KanikoDispatcher) web() {
 
 	ginServer.GET("/kaniko", func(c *gin.Context) {
 		jobQuery := &JobQuery{}
-		c.BindJSON(jobQuery)
+		jobQuery.Name = c.Query("name")
 		// check the job status
 		jobs := k.k8sClient.BatchV1().Jobs(k.namespace)
 		job, err := jobs.Get(context.TODO(), jobQuery.Name, metav1.GetOptions{})
 		if err != nil {
-			msg := "Failed to get job status for" + jobQuery.Name + ": " + err.Error()
+			msg := "Failed to get job status for '" + jobQuery.Name + "': " + err.Error()
 			log.Println(msg)
 			c.JSON(500, gin.H{"error": msg})
 			return
@@ -198,19 +198,19 @@ func (k *KanikoDispatcher) web() {
 		// check if the job is complete
 		if job.Status.Succeeded == 1 {
 			log.Println(jobQuery.Name + " completed successfully")
-			c.JSON(200, gin.H{"message": jobQuery.Name + " completed successfully"})
+			c.JSON(200, gin.H{"message": jobQuery.Name + " completed successfully", "done": true, "pass": true})
 			return
 		}
 		// check if the job is failed
 		if job.Status.Failed == 1 {
 			log.Println(jobQuery.Name + " failed")
-			c.JSON(500, gin.H{"error": jobQuery.Name + " failed"})
+			c.JSON(500, gin.H{"message": jobQuery.Name + " failed", "done": true, "pass": false})
 			return
 		}
 		// check if the job is running
 		if job.Status.Active == 1 {
 			log.Println(jobQuery.Name + " is running")
-			c.JSON(200, gin.H{"message": jobQuery.Name + " is running"})
+			c.JSON(200, gin.H{"message": jobQuery.Name + " is running", "done": false})
 			return
 		}
 
