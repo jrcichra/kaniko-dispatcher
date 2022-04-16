@@ -23,6 +23,9 @@ inputs:
   headers:
     description: "Additional HTTP headers (for things like Cloudflare Access)"
     required: false
+  build-args:
+    description: "Build args"
+    required: false
 runs:
   using: "docker"
   image: "./action/Dockerfile"
@@ -34,3 +37,4 @@ runs:
     - ${{ inputs.secret }}
     - ${{ inputs.arch }}
     - ${{ inputs.headers }}
+    - ${{ inputs.build-args }}
