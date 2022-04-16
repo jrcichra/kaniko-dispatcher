@@ -11,6 +11,7 @@ DESTINATION = os.environ.get('INPUT_DESTINATION')
 SECRET = os.environ.get('INPUT_SECRET')
 ARCH = os.environ.get('INPUT_ARCH')
 HEADERS = os.environ.get('INPUT_HEADERS')
+BUILD_ARGS = os.environ.get('INPUT_BUILD_ARGS')
 EPOCH = time.time_ns()
 
 
@@ -27,6 +28,9 @@ if SECRET:
 
 if ARCH:
     request["arch"] = ARCH
+
+if BUILD_ARGS:
+    request["build_args"] = json.loads(BUILD_ARGS)
 
 headers = json.loads(HEADERS) if HEADERS else {}
 
