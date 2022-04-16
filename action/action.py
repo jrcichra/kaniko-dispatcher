@@ -41,8 +41,8 @@ JOBNAME = r.json()["name"]
 while True:
     r2 = requests.get(
         f"{URL}/kaniko", headers=headers, params={"name": JOBNAME})
+    print(r2.text)
     response = r2.json()
-    print(response)
     if response["done"] and response["pass"]:
         sys.exit(0)
     elif response["done"] and not response["pass"]:
