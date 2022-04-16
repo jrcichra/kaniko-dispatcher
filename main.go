@@ -113,6 +113,7 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 							Args: []string{
 								"--context", jobRequest.Context,
 								"--destination", jobRequest.Destination,
+								"--cache", "true",
 							},
 							VolumeMounts: []v1.VolumeMount{
 								{
