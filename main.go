@@ -126,6 +126,10 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 									v1.ResourceCPU:    resource.MustParse("100m"),
 									v1.ResourceMemory: resource.MustParse("512Mi"),
 								},
+								Limits: v1.ResourceList{
+									v1.ResourceCPU:    resource.MustParse("800m"),
+									v1.ResourceMemory: resource.MustParse("4096Mi"),
+								},
 							},
 						},
 					},
