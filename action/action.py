@@ -42,9 +42,12 @@ while True:
     r2 = requests.get(
         f"{URL}/kaniko", headers=headers, params={"name": JOBNAME})
     print(r2.text)
-    response = r2.json()
-    if response["done"] and response["pass"]:
-        sys.exit(0)
-    elif response["done"] and not response["pass"]:
-        sys.exit(1)
+    try:
+        response = r2.json()
+        if response["done"] and response["pass"]:
+            sys.exit(0)
+        elif response["done"] and not response["pass"]:
+            sys.exit(1)
+    except json.decoder.JSONDecodeError:
+        print(f"Could not decode response: {r2.text}")
     time.sleep(5)
