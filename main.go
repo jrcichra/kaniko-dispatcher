@@ -26,11 +26,12 @@ type KanikoDispatcher struct {
 }
 
 type JobRequest struct {
-	Name        string `json:"name"`
-	Context     string `json:"context"`
-	Destination string `json:"destination"`
-	Secret      string `json:"secret"`
-	Arch        string `json:"arch,omitempty"`
+	Name        string            `json:"name"`
+	Context     string            `json:"context"`
+	Destination string            `json:"destination"`
+	Secret      string            `json:"secret"`
+	Arch        string            `json:"arch,omitempty"`
+	BuildArgs   map[string]string `json:"build_args,omitempty"`
 }
 
 type JobQuery struct {
@@ -96,6 +97,15 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 		nodeSelector = map[string]string{"kubernetes.io/arch": jobRequest.Arch}
 	}
 
+	kanikoArgs := []string{
+		"--context", jobRequest.Context,
+		"--destination", jobRequest.Destination,
+		"--cache", "true",
+	}
+	for k, v := range jobRequest.BuildArgs {
+		kanikoArgs = append(kanikoArgs, "--build-arg", k+"='"+v+"'")
+	}
+
 	jobSpec := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      jobRequest.Name,
@@ -110,11 +120,7 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 						{
 							Name:  jobRequest.Name,
 							Image: "gcr.io/kaniko-project/executor:latest",
-							Args: []string{
-								"--context", jobRequest.Context,
-								"--destination", jobRequest.Destination,
-								"--cache", "true",
-							},
+							Args:  kanikoArgs,
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kaniko-secret",
