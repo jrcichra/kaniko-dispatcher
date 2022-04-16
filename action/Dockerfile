@@ -1,5 +1,5 @@
 FROM python:3.10-alpine3.15
 WORKDIR /kaniko
-ADD action.py requirements.txt /kaniko/
+COPY . .
 RUN pip install -r requirements.txt
 ENTRYPOINT ["python", "/kaniko/action.py"]
