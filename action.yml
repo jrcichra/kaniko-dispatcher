@@ -23,7 +23,7 @@ inputs:
   headers:
     description: "Additional HTTP headers (for things like Cloudflare Access)"
     required: false
-  build-args:
+  build_args:
     description: "Build args"
     required: false
 runs:
@@ -37,4 +37,4 @@ runs:
     - ${{ inputs.secret }}
     - ${{ inputs.arch }}
     - ${{ inputs.headers }}
-    - ${{ inputs.build-args }}
+    - ${{ inputs.build_args }}
