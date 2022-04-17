@@ -103,7 +103,7 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 		"--cache=true",
 	}
 	for k, v := range jobRequest.BuildArgs {
-		kanikoArgs = append(kanikoArgs, "--build-arg="+k+"='"+v+"'")
+		kanikoArgs = append(kanikoArgs, "--build-arg="+k+"="+v)
 	}
 
 	jobSpec := &batchv1.Job{
