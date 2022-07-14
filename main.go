@@ -6,7 +6,6 @@ import (
 	"context"
 	"flag"
 	"log"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 )
 
@@ -39,22 +38,15 @@ type JobQuery struct {
 }
 
 func connectToK8s() *kubernetes.Clientset {
-	kubeconfig_file, exists := os.LookupEnv("KUBECONFIG")
-	if !exists {
-		log.Fatalln("Could not find KUBECONFIG environment variable.")
-	}
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig_file)
+	config, err := rest.InClusterConfig()
 	if err != nil {
-		log.Panicln("failed to create K8s config", err)
+		log.Fatalln(err)
 	}
-
-	client, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Panicln("Failed to create K8s clientset", err)
+		log.Fatalln(err)
 	}
-	return client
-
+	return clientset
 }
 
 func (k *KanikoDispatcher) cleanup() {
