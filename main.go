@@ -118,9 +118,10 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 					NodeSelector: nodeSelector,
 					Containers: []v1.Container{
 						{
-							Name:  jobRequest.Name,
-							Image: "gcr.io/kaniko-project/executor:latest",
-							Args:  kanikoArgs,
+							Name:            jobRequest.Name,
+							Image:           "gcr.io/kaniko-project/executor:latest",
+							ImagePullPolicy: v1.PullAlways,
+							Args:            kanikoArgs,
 							VolumeMounts: []v1.VolumeMount{
 								{
 									Name:      "kaniko-secret",
