@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Repo metadata
         id: repo
         uses: actions/github-script@v3
@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Repo metadata
         id: repo
         uses: actions/github-script@v3
@@ -121,7 +121,7 @@ jobs:
     needs: [build-amd64, build-arm64]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Repo metadata
         id: repo
         uses: actions/github-script@v3
