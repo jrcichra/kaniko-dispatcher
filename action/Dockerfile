@@ -1,4 +1,4 @@
-FROM python:3.11.0b5-alpine3.16
+FROM python:3.11.0rc1-alpine3.16
 WORKDIR /kaniko
 COPY . .
 RUN pip install -r requirements.txt
