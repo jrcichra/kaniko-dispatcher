@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -165,6 +166,11 @@ func (k *KanikoDispatcher) web() {
 		c.JSON(200, gin.H{
 			"status": "Ready for jobs (POST /kaniko)",
 		})
+	})
+
+	// metrics
+	ginServer.GET("/metrics", func(c *gin.Context) {
+		gin.WrapH(promhttp.Handler())
 	})
 
 	ginServer.POST("/kaniko", func(c *gin.Context) {
