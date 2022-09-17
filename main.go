@@ -159,6 +159,14 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 	return resp, err
 }
 
+func prometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
 func (k *KanikoDispatcher) web() {
 	ginServer := gin.Default()
 
@@ -169,9 +177,7 @@ func (k *KanikoDispatcher) web() {
 	})
 
 	// metrics
-	ginServer.GET("/metrics", func(c *gin.Context) {
-		gin.WrapH(promhttp.Handler())
-	})
+	ginServer.GET("/metrics", prometheusHandler())
 
 	ginServer.POST("/kaniko", func(c *gin.Context) {
 		jobRequest := &JobRequest{}
