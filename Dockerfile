@@ -1,4 +1,4 @@
-FROM golang:1.19.2-bullseye as builder
+FROM golang:1.19.3-bullseye as builder
 WORKDIR /kaniko
 COPY . .
 RUN CGO_ENABLED=0 go build -o kaniko-dispatcher
