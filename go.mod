@@ -5,9 +5,9 @@ go 1.17
 require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/prometheus/client_golang v1.14.0
-	k8s.io/api v0.26.2
-	k8s.io/apimachinery v0.26.2
-	k8s.io/client-go v0.26.2
+	k8s.io/api v0.26.3
+	k8s.io/apimachinery v0.26.3
+	k8s.io/client-go v0.26.3
 	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d
 )
 
