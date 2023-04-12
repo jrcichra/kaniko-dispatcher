@@ -5,9 +5,9 @@ go 1.20
 require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/prometheus/client_golang v1.14.0
-	k8s.io/api v0.26.3
-	k8s.io/apimachinery v0.26.3
-	k8s.io/client-go v0.26.3
+	k8s.io/api v0.27.0
+	k8s.io/apimachinery v0.27.0
+	k8s.io/client-go v0.27.0
 	k8s.io/utils v0.0.0-20230313181309-38a27ef9d749
 )
 
