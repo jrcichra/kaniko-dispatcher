@@ -53,9 +53,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64 version
-        run: go version && go build -v -o /tmp/kaniko-dispatcher-amd64
+        run: go version && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o kaniko-dispatcher-amd64
       - name: Build arm64 version
-        run: go version && go build -v -o /tmp/kaniko-dispatcher-arm64
+        run: go version && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o kaniko-dispatcher-arm64
       - uses: docker/build-push-action@v5
         with:
           context: .
