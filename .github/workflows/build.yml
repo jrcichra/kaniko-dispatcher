@@ -52,6 +52,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build amd64 version
+        run: go version && go build -v -o /tmp/kaniko-dispatcher-amd64
+      - name: Build arm64 version
+        run: go version && go build -v -o /tmp/kaniko-dispatcher-arm64
       - uses: docker/build-push-action@v5
         with:
           context: .
