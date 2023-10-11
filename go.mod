@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.17.0
 	k8s.io/api v0.28.2
 	k8s.io/apimachinery v0.28.2

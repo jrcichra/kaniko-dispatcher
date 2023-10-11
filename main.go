@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
@@ -81,7 +82,6 @@ func (k *KanikoDispatcher) cleanup() {
 }
 
 func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string) (*batchv1.Job, error) {
-
 	jobs := k.k8sClient.BatchV1().Jobs(namespace)
 
 	// determine if nodeSelector needs to pick a specific architecture
@@ -167,7 +167,7 @@ func prometheusHandler() gin.HandlerFunc {
 	}
 }
 
-func (k *KanikoDispatcher) web() {
+func (k *KanikoDispatcher) web(ctx context.Context) error {
 	ginServer := gin.Default()
 
 	ginServer.GET("/", func(c *gin.Context) {
@@ -227,14 +227,12 @@ func (k *KanikoDispatcher) web() {
 			c.JSON(200, gin.H{"message": jobQuery.Name + " is running", "done": false})
 			return
 		}
-
 	})
 
-	ginServer.Run(":" + k.httpPort)
+	return ginServer.Run(":" + k.httpPort)
 }
 
 func main() {
-
 	namespace := flag.String("namespace", "kaniko", "Default namespace to run Kaniko jobs in")
 	httpPort := flag.String("http", "8080", "HTTP port to listen on")
 	flag.Parse()
@@ -244,8 +242,23 @@ func main() {
 		namespace: *namespace,
 		httpPort:  *httpPort,
 	}
+	var g run.Group
+	ctx, cancel := context.WithCancel(context.Background())
 
-	go engine.web()
-	go engine.cleanup()
-	select {}
+	g.Add(func() error {
+		engine.web(ctx)
+		return nil
+	}, func(err error) {
+		cancel()
+	})
+
+	g.Add(func() error {
+		engine.cleanup(ctx)
+	}, func(err error) {
+		cancel()
+	})
+
+	if err := g.Run(); err != nil {
+		log.Println(err)
+	}
 }
