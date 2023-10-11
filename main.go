@@ -121,6 +121,10 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 									MountPath: "/kaniko/.docker",
 									ReadOnly:  true,
 								},
+								{
+									Name:      "cache",
+									MountPath: "/cache",
+								},
 							},
 							Resources: v1.ResourceRequirements{
 								Requests: v1.ResourceList{
@@ -147,6 +151,14 @@ func (k *KanikoDispatcher) launchK8sJob(jobRequest *JobRequest, namespace string
 											Path: "config.json",
 										},
 									},
+								},
+							},
+						},
+						{
+							Name: "kaniko cache",
+							VolumeSource: v1.VolumeSource{
+								PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+									ClaimName: "cache",
 								},
 							},
 						},
