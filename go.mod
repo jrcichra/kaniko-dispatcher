@@ -1,13 +1,13 @@
 module github.com/jrcichra/kaniko-dispatcher
 
 go 1.21
-toolchain go1.22.3
+toolchain go1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/prometheus/client_golang v1.19.1
-	k8s.io/api v0.30.2
-	k8s.io/apimachinery v0.30.2
+	k8s.io/api v0.30.3
+	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.2
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 )
