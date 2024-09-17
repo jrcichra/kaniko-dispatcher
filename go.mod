@@ -5,7 +5,7 @@ toolchain go1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/prometheus/client_golang v1.20.3
+	github.com/prometheus/client_golang v1.20.4
 	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
