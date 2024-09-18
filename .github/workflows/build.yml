@@ -3,7 +3,7 @@ name: kaniko-dispatcher
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
