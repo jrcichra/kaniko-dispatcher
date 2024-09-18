@@ -1,7 +1,6 @@
 module github.com/jrcichra/kaniko-dispatcher
 
-go 1.21
-toolchain go1.22.5
+go 1.23
 
 require (
 	github.com/gin-gonic/gin v1.10.0
