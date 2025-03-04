@@ -3,7 +3,7 @@ module github.com/jrcichra/kaniko-dispatcher
 go 1.23
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	k8s.io/api v0.32.2
 	k8s.io/apimachinery v0.32.2
 	k8s.io/client-go v0.32.2
